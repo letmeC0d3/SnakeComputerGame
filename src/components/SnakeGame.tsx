@@ -42,6 +42,46 @@ interface Particle {
   life: number;
 }
 
+// Play synthesized 8-bit sound effects using Web Audio API
+const playSound = (type: "eat" | "die") => {
+  if (typeof window === "undefined") return;
+  try {
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContextClass) return;
+    const ctx = new AudioContextClass();
+    
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    const now = ctx.currentTime;
+    
+    if (type === "eat") {
+      // High-pitched retro blip
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(523.25, now); // C5 note
+      osc.frequency.exponentialRampToValueAtTime(880, now + 0.08); // A5 note
+      gain.gain.setValueAtTime(0.15, now);
+      gain.gain.linearRampToValueAtTime(0.01, now + 0.08);
+      osc.start(now);
+      osc.stop(now + 0.08);
+    } else if (type === "die") {
+      // Descending buzzer note
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(196, now); // G3 note
+      osc.frequency.linearRampToValueAtTime(80, now + 0.4);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
+      osc.start(now);
+      osc.stop(now + 0.4);
+    }
+  } catch (err) {
+    console.warn("Audio Context playback blocked or unsupported:", err);
+  }
+};
+
 interface SnakeGameProps {
   mode: "classic" | "daily";
   onScoreSubmitted?: () => void;
@@ -240,6 +280,7 @@ export default function SnakeGame({ mode, onScoreSubmitted }: SnakeGameProps) {
       const newScore = score + POINTS_PER_FOOD;
       setScore(newScore);
       spawnParticles(foodRef.current.x, foodRef.current.y, "#39ff14");
+      playSound("eat");
       
       // Speed progression
       speedRef.current = Math.max(MIN_SPEED, speedRef.current - SPEED_DECREMENT);
@@ -261,6 +302,9 @@ export default function SnakeGame({ mode, onScoreSubmitted }: SnakeGameProps) {
       // Custom double-pulse vibration pattern for retro game feel (100ms buzz, 50ms pause, 100ms buzz)
       navigator.vibrate([100, 50, 100]);
     }
+
+    // Trigger death sound
+    playSound("die");
 
     const finalDuration = Date.now() - startTimeRef.current - totalPausedTimeRef.current;
     setDurationMs(finalDuration);
