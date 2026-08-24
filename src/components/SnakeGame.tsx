@@ -42,14 +42,38 @@ interface Particle {
   life: number;
 }
 
+// Shared single AudioContext instance for the application
+let audioCtx: AudioContext | null = null;
+
+const getAudioContext = (): AudioContext | null => {
+  if (typeof window === "undefined") return null;
+  if (!audioCtx) {
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (AudioContextClass) {
+      audioCtx = new AudioContextClass();
+    }
+  }
+  return audioCtx;
+};
+
+// Resumes the AudioContext to unlock it from iOS Safari / Chrome suspended states
+const unlockAudio = () => {
+  const ctx = getAudioContext();
+  if (ctx && ctx.state === "suspended") {
+    ctx.resume().catch((err) => console.warn("Failed to resume AudioContext:", err));
+  }
+};
+
 // Play synthesized 8-bit sound effects using Web Audio API
 const playSound = (type: "eat" | "die") => {
-  if (typeof window === "undefined") return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
   try {
-    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-    if (!AudioContextClass) return;
-    const ctx = new AudioContextClass();
-    
+    // Attempt auto-resume if suspended
+    if (ctx.state === "suspended") {
+      ctx.resume().catch(() => {});
+    }
+
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     
@@ -190,6 +214,21 @@ export default function SnakeGame({ mode, onScoreSubmitted }: SnakeGameProps) {
       }
     }
   }, [mode]);
+
+  // Hook to unlock the AudioContext on first user interaction (critical for iOS Safari)
+  useEffect(() => {
+    const handleUnlock = () => {
+      unlockAudio();
+    };
+    window.addEventListener("click", handleUnlock, { once: true });
+    window.addEventListener("touchstart", handleUnlock, { once: true });
+    window.addEventListener("keydown", handleUnlock, { once: true });
+    return () => {
+      window.removeEventListener("click", handleUnlock);
+      window.removeEventListener("touchstart", handleUnlock);
+      window.removeEventListener("keydown", handleUnlock);
+    };
+  }, []);
 
   // Deterministic daily setup generator
   const getDailyPrng = useCallback(() => {
