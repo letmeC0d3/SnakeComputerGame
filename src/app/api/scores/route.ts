@@ -51,7 +51,14 @@ export async function GET(request: NextRequest) {
     const list = mode === "classic" 
       ? [...mockScores].sort((a, b) => b.score - a.score).slice(0, 25)
       : [...mockDailyScores].filter(s => s.challenge_date === challengeDate).sort((a, b) => b.score - a.score).slice(0, 25);
-    return NextResponse.json({ scores: list });
+    return NextResponse.json(
+      { scores: list },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=5, stale-while-revalidate=10",
+        },
+      }
+    );
   }
 
   try {
@@ -74,7 +81,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Failed to retrieve leaderboard scores." }, { status: 500 });
     }
 
-    return NextResponse.json({ scores: data || [] });
+    return NextResponse.json(
+      { scores: data || [] },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=5, stale-while-revalidate=10",
+        },
+      }
+    );
   } catch (err) {
     console.error("API error:", err);
     return NextResponse.json({ error: "An unexpected server error occurred." }, { status: 500 });
