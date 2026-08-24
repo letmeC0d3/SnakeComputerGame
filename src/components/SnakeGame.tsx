@@ -68,14 +68,44 @@ const playSound = (type: "eat" | "die") => {
       osc.start(now);
       osc.stop(now + 0.08);
     } else if (type === "die") {
-      // Descending buzzer note
-      osc.type = "sawtooth";
-      osc.frequency.setValueAtTime(196, now); // G3 note
-      osc.frequency.linearRampToValueAtTime(80, now + 0.4);
-      gain.gain.setValueAtTime(0.2, now);
-      gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
+      // Mario-like death sound sequence: quick ascending notes, pause, then a descending scale
+      const notes = [
+        { freq: 523.25, duration: 0.07 }, // C5
+        { freq: 554.37, duration: 0.07 }, // C#5
+        { freq: 587.33, duration: 0.07 }, // D5
+        { freq: 0, duration: 0.08 },      // pause
+        { freq: 493.88, duration: 0.09 }, // B4
+        { freq: 349.23, duration: 0.09 }, // F4
+        { freq: 0, duration: 0.02 },      // pause gap
+        { freq: 349.23, duration: 0.09 }, // F4
+        { freq: 349.23, duration: 0.09 }, // F4
+        { freq: 329.63, duration: 0.09 }, // E4
+        { freq: 293.66, duration: 0.09 }, // D4
+        { freq: 261.63, duration: 0.18 }, // C4
+      ];
+
+      osc.type = "square"; // Retro 8-bit pulse wave
+      let time = now;
+      gain.gain.setValueAtTime(0.12, time);
+
+      notes.forEach((note) => {
+        if (note.freq === 0) {
+          gain.gain.setValueAtTime(0, time);
+        } else {
+          gain.gain.setValueAtTime(0.12, time);
+          osc.frequency.setValueAtTime(note.freq, time);
+          // Insert a small staccato gap to separate notes
+          gain.gain.setValueAtTime(0, time + note.duration - 0.015);
+        }
+        time += note.duration;
+      });
+
+      // Gradually fade out the last note
+      gain.gain.setValueAtTime(0.12, time - notes[notes.length - 1].duration);
+      gain.gain.exponentialRampToValueAtTime(0.001, time);
+
       osc.start(now);
-      osc.stop(now + 0.4);
+      osc.stop(time);
     }
   } catch (err) {
     console.warn("Audio Context playback blocked or unsupported:", err);
