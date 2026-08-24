@@ -256,6 +256,12 @@ export default function SnakeGame({ mode, onScoreSubmitted }: SnakeGameProps) {
     setGameState("gameover");
     if (gameLoopRef.current) clearTimeout(gameLoopRef.current);
 
+    // Trigger haptic vibration on mobile devices if supported
+    if (typeof window !== "undefined" && typeof navigator !== "undefined" && navigator.vibrate) {
+      // Custom double-pulse vibration pattern for retro game feel (100ms buzz, 50ms pause, 100ms buzz)
+      navigator.vibrate([100, 50, 100]);
+    }
+
     const finalDuration = Date.now() - startTimeRef.current - totalPausedTimeRef.current;
     setDurationMs(finalDuration);
 
