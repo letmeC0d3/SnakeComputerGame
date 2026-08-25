@@ -33,6 +33,9 @@ export const metadata: Metadata = {
     title: "Snake Game - Play Classic Snake Online",
     description: "Play classic Snake online instantly. Compete in the daily challenge, beat high scores, and rank on the global leaderboards.",
   },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+  },
 };
 
 export default function RootLayout({
@@ -40,11 +43,28 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "G-28DBNBBZJ9";
+
   return (
     <html
       lang="en"
       className={`${pressStart2P.variable} ${inter.variable} h-full antialiased`}
     >
+      <head>
+        {/* Google Analytics Tag (gtag.js) rendered statically in head for automated validation crawlers */}
+        <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              window.gtag = gtag;
+              gtag('js', new Date());
+              gtag('config', '${gaId}');
+            `,
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col bg-[#0b0f19] text-slate-50 font-sans">
         {children}
       </body>
