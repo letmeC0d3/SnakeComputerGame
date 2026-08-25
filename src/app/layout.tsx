@@ -43,7 +43,7 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "G-28DBNBBZJ9";
+  const gaId = "G-28DBNBBZJ9";
 
   return (
     <html
