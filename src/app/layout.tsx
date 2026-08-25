@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Press_Start_2P, Inter } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
 const pressStart2P = Press_Start_2P({
@@ -67,6 +68,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-[#0b0f19] text-slate-50 font-sans">
         {children}
+        <Analytics />
       </body>
     </html>
   );
