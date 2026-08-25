@@ -42,6 +42,12 @@ export async function GET(request: NextRequest) {
   // Fallback check
   if (!hasSupabaseCreds || !supabase) {
     if (process.env.NODE_ENV !== "development") {
+      console.error(
+        "Supabase credentials check failed. Missing variables: " +
+        `NEXT_PUBLIC_SUPABASE_URL: ${!process.env.NEXT_PUBLIC_SUPABASE_URL ? 'MISSING' : 'OK'}, ` +
+        `NEXT_PUBLIC_SUPABASE_ANON_KEY: ${!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'MISSING' : 'OK'}, ` +
+        `SUPABASE_SERVICE_ROLE_KEY: ${!process.env.SUPABASE_SERVICE_ROLE_KEY ? 'MISSING' : 'OK'}`
+      );
       return NextResponse.json(
         { error: "Leaderboard database is currently unavailable." },
         { status: 503 }
