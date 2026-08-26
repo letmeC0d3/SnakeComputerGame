@@ -18,14 +18,14 @@ export const metadata: Metadata = {
   title: "Snake Game - Play Classic Snake Online",
   description: "Play classic Snake online instantly. Compete in the daily challenge, beat high scores, and rank on the global leaderboards. No sign-up required.",
   keywords: ["snake game", "play snake", "snake game online", "classic snake game", "free snake game"],
-  metadataBase: new URL("https://snakecomputergame.com"),
+  metadataBase: new URL("https://www.snakecomputergame.com"),
   alternates: {
     canonical: "/",
   },
   openGraph: {
     title: "Snake Game - Play Classic Snake Online",
     description: "Play classic Snake online instantly. Compete in the daily challenge, beat high scores, and rank on the global leaderboards.",
-    url: "https://snakecomputergame.com",
+    url: "https://www.snakecomputergame.com",
     siteName: "SnakeComputerGame.com",
     type: "website",
   },
